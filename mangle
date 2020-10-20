@@ -72,6 +72,15 @@ then
 		# Enter notes mode
 		notesmode=1
 		unset patterns[-1]
+	elif [[ "${patterns[-1]}" =~ sec|section|sections ]]; then
+		IFS=$'\n' sections=( $(man $man_page | tail -n +2 | grep -P "^[A-Z]{2,}") )
+		select section in "${sections[@]}"; do
+			# PAGER="less -p ^\"$section\"" man $man_page  # Doesn't seem to respect $PAGER
+			# man -P "less -p ^$section" $man_page  # Worked but not if spaces in $section
+			echo "You just looked at $section. Ctrl-C to quit."
+			LESS=-p"^$section" man $man_page
+		done
+		exit
 	fi
 fi
 
