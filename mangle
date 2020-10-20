@@ -1,6 +1,7 @@
 #!/bin/bash
 
 less_command='| less $less_no_init -aiF -Ps"Manual page\: $man_page (?ltline %lt?L/%L.:byte %bB?s/%s..? (END):?pB %pB\%..)"'
+grepopts='-i'  # grep case-insensitive by default
 
 # Get section
 if [[ $1 =~ [0-9]+ ]]
@@ -25,9 +26,22 @@ man_page="${man_page[@]}"
 # Build grep command
 if [[ ${patterns[@]} ]]
 then
-    patterns="${patterns[@]}"
-    patterns=${patterns// /|}
-    grep_command="| egrep -i -C4 --color=always -- $(printf "%q" "$patterns")"
+	# If first "pattern" is 'opt' then add some regex to next pattern (should allow more than one pattern to be converted this way)
+	if [ "${patterns[-1]}" = 'opt' ]
+	then
+		if [ "${#patterns[@]}" -gt 1 ]
+		then
+			unset patterns[-1]
+			patterns[-1]="'^ *${patterns[-1]}[ ,]'"
+			# grep case-sensitive if there's an opt pattern
+			grepopts=''
+		else
+			# opt by itself just looks for any leading hyphen
+			patterns[-1]="'^ *-[A-Z]*[ ,]'"
+		fi
+	fi
+
+    grep_command="| grep $grepopts -C4 --color=always ${patterns[@]/#/-e }"
 fi
 
 command="command man $section $man_page $grep_command"
