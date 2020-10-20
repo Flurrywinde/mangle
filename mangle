@@ -44,7 +44,15 @@ then
     grep_command="| grep $grepopts -C4 --color=always ${patterns[@]/#/-e }"
 fi
 
-command="command man $section $man_page $grep_command"
+# Patterns given on command line, so give grep version
+if [[ ${patterns[@]} ]]; then
+	# Show man page with search patterns highlighted, piped through less
+	command="command man $section $man_page $grep_command"
+else
+	# If no patterns, don't pipe through less (to keep man page TERMCAP coloring)
+	command="command man $section $man_page"
+	less_command=''
+fi
 
 # Check screen and output sizes
 tty_lines=$(tput lines)
