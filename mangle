@@ -6,11 +6,16 @@ notesmode=0             # show personal notes instead of man page if set to 1
 notes_indicator='notes'  # If this is the first search pattern, display personal notes instead of man page
 notesdir=~/.local/share/manglenotes
 
-# Get section
+# Get section or -e option
 if [[ $1 =~ [0-9]+ ]]
 then
     section=$1
     shift
+elif [ "$1" = '-e' ]; then
+	# -e arg means to edit personal notes for the next arg (ignores other args and doesn't work for multi-word commands)
+	shift
+	vim "$notesdir/$1"
+	exit
 fi
 
 # Find the longest set of args that gets a man page
