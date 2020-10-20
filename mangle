@@ -54,12 +54,14 @@ else
 	less_command=''
 fi
 
-# Check screen and output sizes
-tty_lines=$(tput lines)
-output_lines=$(eval "$command" | wc -l)
+# Check screen and output sizes (only do this if actually piping into less. Reason: wc chokes on mpv's man page)
+if [ ! -z "$less_command" ]; then
+	tty_lines=$(tput lines)
+	output_lines=$(eval "$command" | wc -l)
 
-# If output < screen size, use less with -X
-[[ $output_lines -lt $tty_lines ]] && less_no_init="-X"
+	# If output < screen size, use less with -X
+	[[ $output_lines -lt $tty_lines ]] && less_no_init="-X"
+fi
 
 # Display the page
 eval "$command $less_command"
